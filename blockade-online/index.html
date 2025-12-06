@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="main_css" rel="stylesheet" href="">
+    <title>Live Servers</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="/fav/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/fav/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/fav/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/fav/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/fav/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/fav/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/fav/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/fav/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/fav/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/fav/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png">
+    <link rel="manifest" href="/fav/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/fav/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+    <div class="settings">
+
+        <div class="timer" style="display: none;">
+            Таймер обновления: <span class="deley_timer"></span>
+        </div>
+    </div>
+
+    <div class="content">
+
+
+
+    </div>
+
+    <div id="pointer"></div>
+
+
+    <div style="display: none;">
+        <div class="card">
+            <div class="textBox">
+                <div class="textContent">
+                    <p class="h1">Карта без названия</p>
+                    <span class="span">12 min ago</span>
+                </div>
+                <p class="p">Xhattmahs is not attacking your base!</p>
+                <div>
+                </div>
+            </div>
+        </div>
+        <div class="allmapstonotify">
+
+        </div>
+    </div>
+
+
+    <canvas id="canvas"></canvas>
+
+    <div class="Settings_Panel">
+        <div class="input-container">
+            <label class="labelinput" for="name" class="name">Кол-во шариков:</label>
+            <input id="ring_more" type="range" class="input" min="0" max="400" value="60" step="5">
+            <div class="underline"></div>
+        </div>
+        <div class="input-container">
+            <label class="labelinput" for="name" class="name">Cкорость шариков:</label>
+            <input id="balls_speed" type="range" class="input" min="0" max="7" value="1" step="0.1">
+            <div class="underline"></div>
+        </div>
+        <div class="input-container">
+            <label class="labelinput" for="name" class="name">Хочу карту:</label>
+            <input id="wait_map" placeholder="Введи название" title="Название на русском с большой буквы" type="text"
+                class="input">
+            <div class="underline"></div>
+            <div class="uvedBut">
+                <input id="uvedButton" type="checkbox" value="уведомлять" class="input">Уведомлять
+            </div>
+            
+        </div>
+    </div>
+    <button class="button" id="settingsButton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 20 20" height="20" fill="none" class="svg-icon">
+            <g stroke-width="1.5" stroke-linecap="round">
+                <circle r="2.5" cy="10" cx="10"></circle>
+                <path fill-rule="evenodd"
+                    d="m8.39079 2.80235c.53842-1.51424 2.67991-1.51424 3.21831-.00001.3392.95358 1.4284 1.40477 2.3425.97027 1.4514-.68995 2.9657.82427 2.2758 2.27575-.4345.91407.0166 2.00334.9702 2.34248 1.5143.53842 1.5143 2.67996 0 3.21836-.9536.3391-1.4047 1.4284-.9702 2.3425.6899 1.4514-.8244 2.9656-2.2758 2.2757-.9141-.4345-2.0033.0167-2.3425.9703-.5384 1.5142-2.67989 1.5142-3.21831 0-.33914-.9536-1.4284-1.4048-2.34247-.9703-1.45148.6899-2.96571-.8243-2.27575-2.2757.43449-.9141-.01669-2.0034-.97028-2.3425-1.51422-.5384-1.51422-2.67994.00001-3.21836.95358-.33914 1.40476-1.42841.97027-2.34248-.68996-1.45148.82427-2.9657 2.27575-2.27575.91407.4345 2.00333-.01669 2.34247-.97026z"
+                    clip-rule="evenodd"></path>
+            </g>
+        </svg>
+        <span class="lable">Settings</span>
+    </button>
+
+    <script src="script.js"></script>
+    <script src="cursor.js"></script>
+    <script src="back.js"></script>
+    <script src="notify.js"></script>
+    <script src="adaptive.js"></script>
+</body>
+
+</html>
