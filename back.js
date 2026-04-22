@@ -33,7 +33,7 @@ const gradientColors = [
     '#f5576c'  // Красный
 ];
 
-const backgroundText = "OHS - ДОЛБАЁБ";
+const backgroundText = "ПРОДАМ ГАРАЖ: t.me/novalink_clan";
 const textColor = 'rgba(255, 255, 255, 0.25)'; // Цвет текста
 
 // Установка размеров канваса на всю видимую часть страницы
