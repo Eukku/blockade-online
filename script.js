@@ -58,7 +58,6 @@ function handleResponse(responseText) {
         });
         return namedObject; // Возвращаем объект для каждой строки
     });
-    //console.table(jsonOutput);
     const filteredOutput = jsonOutput.filter(obj => obj["кол-игроков"] !== "0");
 
     // Заменяем значения в графе "Режим"
@@ -319,11 +318,3 @@ function handleResponse(responseText) {
 // Запускаем первый запрос данных при загрузке страницы
 
 fetchData();
-
-
-
-
-
-
-
-

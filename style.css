@@ -3,7 +3,7 @@
     padding: 0;
     --primary: #a5d95a;
     --pointer-size: 22px;
-    cursor: none;
+    cursor: auto;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -13,28 +13,18 @@
     overflow: hidden;
     font-family: 'MyCustomFont', sans-serif;
 }
-@font-face {
-    font-family: 'MyCustomFont'; /* Название шрифта */
-    src: url('UKIJTeng.ttf') format('truetype'); /* Путь к файлу шрифта */
-    font-weight: normal; /* Нормальный вес шрифта */
-    font-style: normal; /* Нормальный стиль шрифта */
-}
+
 body {
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow-y: scroll;
-    width: 100vw;
-    height: 100vh;
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 45%, #f093fb 100%);
+  color: white;
+  font-family: Arial, sans-serif;
 }
 
 body::-webkit-scrollbar {
     display: none; /* Скрыть скроллбар */
 }
-
-
-
-
 
 
 
@@ -130,29 +120,6 @@ body::-webkit-scrollbar {
     margin-left: 4vw;
 }
 
-
-
-
-#pointer {
-    content: '';
-    background: #a5d95a;
-    /* Ваш цвет */
-    width: 2vw;
-    height: 2vw;
-    transform: translateX(-50%) translateY(-50%) rotateZ(45deg);
-    position: absolute;
-    z-index: 100;
-    /* Убедитесь, что указатель выше других элементов */
-    display: block;
-    outline-color: #a5d95a;
-    outline-style: solid;
-    outline-width: 2px;
-    animation: cursor 1s infinite;
-    box-shadow: 0px 0px 20px #a5d95a;
-    pointer-events: none;
-    /* Чтобы указатель не мешал взаимодействию с другими элементами */
-    transition: width 0.15s ease-in-out, height 0.15s ease-in-out;
-}
 
 @keyframes cursor {
     from {
