@@ -1,6 +1,6 @@
 function fetchData() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://little-mouse-9ca4.pravo669719.workers.dev/', true);
+    xhr.open('GET', 'https://little-mouse-9ca4.pravo669719.workers.dev/?NETWORK=1&CMD=4&time=1', true);
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
