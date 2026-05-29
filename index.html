@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link id="main_css" rel="stylesheet" href="">
+    <link rel="stylesheet" href="style.css?v=6">
     <title>Live Servers</title>
     <link rel="apple-touch-icon" sizes="57x57" href="/fav/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/fav/apple-icon-60x60.png">
@@ -27,19 +27,16 @@
 
 <body>
     <div class="settings">
-
         <div class="timer" style="display: none;">
             Таймер обновления: <span class="deley_timer"></span>
         </div>
     </div>
 
     <div class="content">
-
-
-
+        <!-- Сюда динамически вставляются карточки серверов через script.js -->
     </div>
 
-
+    <!-- Шаблон карточки (скрыт) -->
     <div style="display: none;">
         <div class="card">
             <div class="textBox">
@@ -48,17 +45,14 @@
                     <span class="span">12 min ago</span>
                 </div>
                 <p class="p">Xhattmahs is not attacking your base!</p>
-                <div>
-                </div>
+                <div></div>
             </div>
         </div>
-        <div class="allmapstonotify">
-
-        </div>
+        <div class="allmapstonotify"></div>
     </div>
 
+    <!-- Скрипты -->
     <script src="script.js"></script>
-    <script src="adaptive.js"></script>
 </body>
 
 </html>
