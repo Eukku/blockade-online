@@ -1,24 +1,10 @@
-function isMobileDevice() {
-    return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-}
+(function () {
+    const mainCss = document.getElementById('main_css');
 
-if (isMobileDevice()) {
-    document.getElementById('main_css').href = 'mobil.css';
-} else {
-    document.getElementById('main_css').href = 'style.css';
-}
-
-function checkOrientation() {
-    if (window.innerHeight > window.innerWidth) {
-        document.getElementById('main_css').href = 'mobil.css';
-    } else {
-        document.getElementById('main_css').href = 'style.css';
+    if (!mainCss) {
+        console.warn('CSS link with id="main_css" was not found');
+        return;
     }
-}
 
-// Проверяем ориентацию при загрузке страницы
-checkOrientation();
-
-// Отслеживаем изменения размера окна
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('resize', isMobileDevice);
+    mainCss.href = 'style.css?v=5';
+})();
