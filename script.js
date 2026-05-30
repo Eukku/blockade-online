@@ -4,6 +4,11 @@ const REFRESH_SECONDS = 10;
 const contentElement = document.querySelector('.content');
 const timerElement = document.querySelector('.deley_timer');
 
+let currentRequest = null;
+let refreshInterval = null;
+let isLoading = false;
+let hasRenderedServers = false;
+
 const modeMapping = {
     '0': 'Битва',
     '2': 'Стройка',
@@ -295,7 +300,6 @@ function createServerCard(server) {
 
     box.appendChild(textContent);
     box.appendChild(mode);
-
     card.appendChild(box);
 
     return card;
@@ -318,16 +322,51 @@ function renderServers(servers) {
     });
 
     contentElement.appendChild(fragment);
+    hasRenderedServers = true;
+}
+
+function abortCurrentRequest() {
+    if (!currentRequest) return;
+
+    try {
+        currentRequest.abort();
+    } catch (_) {
+        // intentionally ignored
+    }
+
+    currentRequest = null;
 }
 
 function requestText(url) {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        currentRequest = xhr;
+
+        let finished = false;
+
+        const manualTimeout = setTimeout(() => {
+            if (finished) return;
+
+            finished = true;
+
+            try {
+                xhr.abort();
+            } catch (_) {
+                // intentionally ignored
+            }
+
+            reject(new Error('Request timeout'));
+        }, 15000);
 
         xhr.open('GET', url, true);
         xhr.timeout = 15000;
 
         xhr.onload = function () {
+            if (finished) return;
+
+            finished = true;
+            clearTimeout(manualTimeout);
+
             if (xhr.status >= 200 && xhr.status < 300) {
                 resolve(xhr.responseText);
             } else {
@@ -336,26 +375,62 @@ function requestText(url) {
         };
 
         xhr.onerror = function () {
+            if (finished) return;
+
+            finished = true;
+            clearTimeout(manualTimeout);
+
             reject(new Error('Network error'));
         };
 
         xhr.ontimeout = function () {
+            if (finished) return;
+
+            finished = true;
+            clearTimeout(manualTimeout);
+
             reject(new Error('Request timeout'));
+        };
+
+        xhr.onabort = function () {
+            if (finished) return;
+
+            finished = true;
+            clearTimeout(manualTimeout);
+
+            reject(new Error('Request aborted'));
         };
 
         xhr.send();
     });
 }
 
-async function fetchData() {
+async function fetchData(options = {}) {
+    const force = Boolean(options.force);
+
+    if (isLoading && !force) {
+        return;
+    }
+
+    if (force) {
+        abortCurrentRequest();
+        isLoading = false;
+    }
+
+    isLoading = true;
+
     try {
         if (!contentElement) {
             return;
         }
 
-        showStatus('Загрузка онлайна...', 'Получаем данные серверов');
+        if (!hasRenderedServers || force) {
+            showStatus('Загрузка онлайна...', 'Получаем данные серверов');
+        }
 
-        const url = `${API_URL}&cache=${Date.now()}`;
+        const separator = API_URL.includes('?') ? '&' : '?';
+        const url = `${API_URL}${separator}cache=${Date.now()}`;
+
         const text = await requestText(url);
 
         if (!text) {
@@ -371,14 +446,27 @@ async function fetchData() {
         const servers = parseServers(text);
         renderServers(servers);
     } catch (error) {
-        showStatus('Не удалось загрузить онлайн', String(error.message || error));
+        const message = String(error && error.message ? error.message : error);
+
+        if (message === 'Request aborted') {
+            return;
+        }
+
+        showStatus('Не удалось загрузить онлайн', message);
+    } finally {
+        isLoading = false;
+        currentRequest = null;
     }
 }
 
 function startAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+
     let countdown = REFRESH_SECONDS;
 
-    setInterval(() => {
+    refreshInterval = setInterval(() => {
         if (timerElement) {
             timerElement.textContent = String(countdown);
         }
@@ -392,5 +480,26 @@ function startAutoRefresh() {
     }, 1000);
 }
 
-fetchData();
-startAutoRefresh();
+function initPage() {
+    abortCurrentRequest();
+    isLoading = false;
+
+    fetchData({ force: true });
+    startAutoRefresh();
+}
+
+window.addEventListener('pageshow', function () {
+    initPage();
+});
+
+document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) {
+        initPage();
+    }
+});
+
+window.addEventListener('online', function () {
+    initPage();
+});
+
+initPage();
