@@ -484,8 +484,38 @@ function initPage() {
     abortCurrentRequest();
     isLoading = false;
 
-    fetchData({ force: true });
+    function startApp() {
     startAutoRefresh();
+
+    // Первая попытка — сразу после полной загрузки страницы
+    fetchData();
+
+    // iPhone/WebKit иногда подвешивает первый запрос после reload.
+    // Поэтому делаем мягкие повторные попытки, но только если серверы ещё не отрисованы.
+    setTimeout(() => {
+        if (!hasRenderedServers) {
+            fetchData({ force: true });
+        }
+    }, 1200);
+
+    setTimeout(() => {
+        if (!hasRenderedServers) {
+            fetchData({ force: true });
+        }
+    }, 3500);
+
+    setTimeout(() => {
+        if (!hasRenderedServers) {
+            fetchData({ force: true });
+        }
+    }, 7000);
+}
+
+if (document.readyState === 'complete') {
+    startApp();
+} else {
+    window.addEventListener('load', startApp, { once: true });
+}
 }
 
 window.addEventListener('pageshow', function () {
