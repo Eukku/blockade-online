@@ -202,26 +202,49 @@ const mapMapping = {
     '1410': 'Австрия',
     '1411': 'Индастриал',
     '1412': 'Церковь',
-    '1413': 'Дайр'
+    '1413': 'Дайр',
+    '1414': 'Карта 1414',
+    '1415': 'Карта 1415',
+    '1701': 'Карта 1701',
+    '1702': 'Карта 1702',
+    '1703': 'Карта 1703',
+    '1704': 'Карта 1704',
+    '1705': 'Карта 1705',
+    '1706': 'Карта 1706',
+    '1707': 'Карта 1707',
+    '1708': 'Карта 1708',
+    '1709': 'Карта 1709',
+    '1710': 'Карта 1710',
+    '1711': 'Карта 1711'
 };
 
-function setStatus(message) {
+function showStatus(title, description = '') {
     if (!contentElement) return;
 
     contentElement.innerHTML = '';
 
-    const statusCard = document.createElement('div');
-    statusCard.className = 'card';
-    statusCard.innerHTML = `
-        <div class="textBox">
-            <div class="textContent">
-                <p class="h1">${message}</p>
-            </div>
-            <p class="p">Проверь соединение или консоль браузера</p>
-        </div>
-    `;
+    const card = document.createElement('div');
+    card.className = 'card';
 
-    contentElement.appendChild(statusCard);
+    const box = document.createElement('div');
+    box.className = 'textBox';
+
+    const textContent = document.createElement('div');
+    textContent.className = 'textContent';
+
+    const h = document.createElement('p');
+    h.className = 'h1';
+    h.textContent = title;
+
+    const p = document.createElement('p');
+    p.className = 'p';
+    p.textContent = description;
+
+    textContent.appendChild(h);
+    box.appendChild(textContent);
+    box.appendChild(p);
+    card.appendChild(box);
+    contentElement.appendChild(card);
 }
 
 function parseServers(responseText) {
@@ -231,16 +254,14 @@ function parseServers(responseText) {
         .filter(Boolean)
         .map(line => line.split('|'))
         .map(parts => {
-            const modeId = parts[1];
-            const players = parts[4];
-            const maxPlayers = parts[5];
-            const mapId = parts[6];
-
             return {
-                mode: modeMapping[modeId] || `Режим ${modeId}`,
-                players: Number(players || 0),
-                maxPlayers: Number(maxPlayers || 0),
-                map: mapMapping[mapId] || `Карта ${mapId}`
+                network: parts[0],
+                modeId: parts[1],
+                ip: parts[2],
+                port: parts[3],
+                players: Number(parts[4] || 0),
+                maxPlayers: Number(parts[5] || 0),
+                mapId: parts[6]
             };
         })
         .filter(server => server.players > 0)
@@ -251,19 +272,31 @@ function createServerCard(server) {
     const card = document.createElement('div');
     card.className = 'card';
 
-    card.innerHTML = `
-        <div class="textBox">
-            <div class="textContent">
-                <p class="h1"></p>
-                <span class="span"></span>
-            </div>
-            <p class="p"></p>
-        </div>
-    `;
+    const box = document.createElement('div');
+    box.className = 'textBox';
 
-    card.querySelector('.h1').textContent = server.map;
-    card.querySelector('.span').textContent = `${server.players} / ${server.maxPlayers}`;
-    card.querySelector('.p').textContent = server.mode;
+    const textContent = document.createElement('div');
+    textContent.className = 'textContent';
+
+    const title = document.createElement('p');
+    title.className = 'h1';
+    title.textContent = mapMapping[server.mapId] || `Карта ${server.mapId}`;
+
+    const online = document.createElement('span');
+    online.className = 'span';
+    online.textContent = `${server.players} / ${server.maxPlayers}`;
+
+    const mode = document.createElement('p');
+    mode.className = 'p';
+    mode.textContent = modeMapping[server.modeId] || `Режим ${server.modeId}`;
+
+    textContent.appendChild(title);
+    textContent.appendChild(online);
+
+    box.appendChild(textContent);
+    box.appendChild(mode);
+
+    card.appendChild(box);
 
     return card;
 }
@@ -274,7 +307,7 @@ function renderServers(servers) {
     contentElement.innerHTML = '';
 
     if (servers.length === 0) {
-        setStatus('Онлайн-серверов нет');
+        showStatus('Онлайн-серверов нет', 'API ответил, но игроков сейчас 0');
         return;
     }
 
@@ -287,39 +320,58 @@ function renderServers(servers) {
     contentElement.appendChild(fragment);
 }
 
+function requestText(url) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('GET', url, true);
+        xhr.timeout = 15000;
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.responseText);
+            } else {
+                reject(new Error(`HTTP ${xhr.status}`));
+            }
+        };
+
+        xhr.onerror = function () {
+            reject(new Error('Network error'));
+        };
+
+        xhr.ontimeout = function () {
+            reject(new Error('Request timeout'));
+        };
+
+        xhr.send();
+    });
+}
+
 async function fetchData() {
     try {
         if (!contentElement) {
-            console.error('Не найден .content');
             return;
         }
 
-        if (contentElement.children.length === 0) {
-            setStatus('Загрузка онлайна...');
+        showStatus('Загрузка онлайна...', 'Получаем данные серверов');
+
+        const url = `${API_URL}&cache=${Date.now()}`;
+        const text = await requestText(url);
+
+        if (!text) {
+            showStatus('API вернул пустой ответ', 'Ответ есть, но в нём нет текста');
+            return;
         }
 
-        const url = `${API_URL}&_=${Date.now()}`;
-
-        const response = await fetch(url, {
-            method: 'GET',
-            cache: 'no-store'
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const text = await response.text();
-
-        if (!text || !text.includes('|')) {
-            throw new Error('Пустой или неправильный ответ API');
+        if (!text.includes('|')) {
+            showStatus('API вернул странный ответ', text.slice(0, 120));
+            return;
         }
 
         const servers = parseServers(text);
         renderServers(servers);
     } catch (error) {
-        console.error('Ошибка загрузки онлайна:', error);
-        setStatus('Не удалось загрузить онлайн');
+        showStatus('Не удалось загрузить онлайн', String(error.message || error));
     }
 }
 
