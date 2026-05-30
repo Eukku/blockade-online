@@ -8,6 +8,7 @@ let currentRequest = null;
 let refreshInterval = null;
 let isLoading = false;
 let hasRenderedServers = false;
+let appStarted = false;
 
 const modeMapping = {
     '0': 'Битва',
@@ -208,6 +209,7 @@ const mapMapping = {
     '1411': 'Индастриал',
     '1412': 'Церковь',
     '1413': 'Дайр',
+
     '1414': 'Карта 1414',
     '1415': 'Карта 1415',
     '1701': 'Карта 1701',
@@ -305,6 +307,16 @@ function createServerCard(server) {
     return card;
 }
 
+function cleanUrlAfterSuccessfulLoad() {
+    const cleanUrl = window.location.origin + window.location.pathname;
+
+    try {
+        window.history.replaceState({}, '', cleanUrl);
+    } catch (_) {
+        // intentionally ignored
+    }
+}
+
 function renderServers(servers) {
     if (!contentElement) return;
 
@@ -323,6 +335,8 @@ function renderServers(servers) {
 
     contentElement.appendChild(fragment);
     hasRenderedServers = true;
+
+    cleanUrlAfterSuccessfulLoad();
 }
 
 function abortCurrentRequest() {
@@ -407,6 +421,7 @@ function requestText(url) {
 
 async function fetchData(options = {}) {
     const force = Boolean(options.force);
+    const silent = Boolean(options.silent);
 
     if (isLoading && !force) {
         return;
@@ -424,7 +439,7 @@ async function fetchData(options = {}) {
             return;
         }
 
-        if (!hasRenderedServers || force) {
+        if (!hasRenderedServers && !silent) {
             showStatus('Загрузка онлайна...', 'Получаем данные серверов');
         }
 
@@ -452,7 +467,9 @@ async function fetchData(options = {}) {
             return;
         }
 
-        showStatus('Не удалось загрузить онлайн', message);
+        if (!hasRenderedServers) {
+            showStatus('Не удалось загрузить онлайн', message);
+        }
     } finally {
         isLoading = false;
         currentRequest = null;
@@ -475,61 +492,60 @@ function startAutoRefresh() {
 
         if (countdown < 0) {
             countdown = REFRESH_SECONDS;
-            fetchData();
+            fetchData({ silent: true });
         }
     }, 1000);
 }
 
-function initPage() {
-    abortCurrentRequest();
-    isLoading = false;
+function hardReloadOnce() {
+    const url = new URL(window.location.href);
 
-    function startApp() {
-    startAutoRefresh();
+    if (url.searchParams.get('fresh') === '1') {
+        return false;
+    }
 
-    // Первая попытка — сразу после полной загрузки страницы
-    fetchData();
+    url.searchParams.set('fresh', '1');
+    url.searchParams.set('t', String(Date.now()));
 
-    // iPhone/WebKit иногда подвешивает первый запрос после reload.
-    // Поэтому делаем мягкие повторные попытки, но только если серверы ещё не отрисованы.
-    setTimeout(() => {
-        if (!hasRenderedServers) {
-            fetchData({ force: true });
-        }
-    }, 1200);
-
-    setTimeout(() => {
-        if (!hasRenderedServers) {
-            fetchData({ force: true });
-        }
-    }, 3500);
-
-    setTimeout(() => {
-        if (!hasRenderedServers) {
-            fetchData({ force: true });
-        }
-    }, 7000);
+    window.location.replace(url.toString());
+    return true;
 }
+
+function startApp() {
+    if (appStarted) {
+        return;
+    }
+
+    appStarted = true;
+
+    startAutoRefresh();
+    fetchData({ force: true });
+
+    setTimeout(() => {
+        if (!hasRenderedServers) {
+            hardReloadOnce();
+        }
+    }, 5000);
+}
+
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        hardReloadOnce();
+    }
+});
+
+document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && hasRenderedServers) {
+        fetchData({ silent: true });
+    }
+});
+
+window.addEventListener('online', function () {
+    fetchData({ force: true });
+});
 
 if (document.readyState === 'complete') {
     startApp();
 } else {
     window.addEventListener('load', startApp, { once: true });
 }
-}
-
-window.addEventListener('pageshow', function () {
-    initPage();
-});
-
-document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) {
-        initPage();
-    }
-});
-
-window.addEventListener('online', function () {
-    initPage();
-});
-
-initPage();
